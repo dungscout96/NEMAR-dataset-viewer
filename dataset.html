@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="./css/bootstrap.css" rel="stylesheet" media="screen">
+    <script
+            src="https://code.jquery.com/jquery-2.2.4.min.js"
+            integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44="
+            crossorigin="anonymous"></script>
+    <script src="./js/bootstrap.js"></script>
+    <script src="./js/bootstrap-treeview.min.js"></script>
+    <title>Title</title>
+    <script>
+        function getTree() {
+            // Some logic to retrieve, or generate tree structure
+            var data = [
+                {
+                    text: "Parent 1",
+                    nodes: [
+                        {
+                            text: "Child 1",
+                            nodes: [
+                                {
+                                    text: "Grandchild 1"
+                                },
+                                {
+                                    text: "Grandchild 2"
+                                }
+                            ]
+                        },
+                        {
+                            text: "Child 2"
+                        }
+                    ]
+                },
+                {
+                    text: "Parent 2"
+                },
+                {
+                    text: "Parent 3"
+                },
+                {
+                    text: "Parent 4"
+                },
+                {
+                    text: "Parent 5"
+                }
+            ];
+            return data;
+        }
+
+    </script>
+</head>
+<body>
+
+    <div class="container">
+        <div class="row">
+            <h1>Face processing EEG dataset for EEGLAB</h1>
+        </div>
+        <div class="row">
+            <div class="col-lg-6">
+                <p>Envelope icon: <span class="glyphicon glyphicon-envelope"></span></p>
+                <p>Search icon: <span class="glyphicon glyphicon-search"></span></p>
+                <p>Print icon: <span class="glyphicon glyphicon-print"></span></p>
+            </div>
+            <div class="col-lg-6">
+                <h3>File Tree Browser</h3>
+                <div id="tree"></div>
+            </div>
+        </div>
+    </div>
+    <script>
+        $('#tree').treeview({data: getTree(), showBorder: false});
+    </script>
+
+</body>
+</html>
