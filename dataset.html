@@ -12,44 +12,51 @@
     <script src="./js/bootstrap-treeview.min.js"></script>
     <title>Title</title>
     <script>
-        function getTree() {
-            // Some logic to retrieve, or generate tree structure
-            var data = [
-                {
-                    text: "Parent 1",
-                    nodes: [
-                        {
-                            text: "Child 1",
-                            nodes: [
-                                {
-                                    text: "Grandchild 1"
-                                },
-                                {
-                                    text: "Grandchild 2"
-                                }
-                            ]
-                        },
-                        {
-                            text: "Child 2"
-                        }
-                    ]
-                },
-                {
-                    text: "Parent 2"
-                },
-                {
-                    text: "Parent 3"
-                },
-                {
-                    text: "Parent 4"
-                },
-                {
-                    text: "Parent 5"
-                }
-            ];
-            return data;
+        function gitToFileTree(datasetID, gitTree) {
+            let fileTree = [];
+            gitTree.forEach(function(item) {
+                if (item['type'] === 'tree')
+                    fileTree.push({text: item['path'], state: {expanded: false}, nodes: gitToFileTree(datasetID, getGitTree(datasetID,item['sha']))})
+                else if (item['type'] === "blob")
+                    fileTree.push({text: item['path']})
+                })
+            return fileTree
         }
-
+        function getGitTree(datasetID, sha) {
+            let data = null
+            let treeContentURL = 'https://api.github.com/repos/OpenNeuroDatasets/' +
+                datasetID + '/git/trees/' + sha;
+            $.ajax({
+                url: treeContentURL,
+                type: "GET",
+                async: false,
+                success: function(result) {
+                    data = result['tree']
+                },
+                error:function(error) {
+                    console.log('Error ' + error)
+                }
+            })
+            return data
+        }
+        function getData(datasetID) {
+            const query = 'https://api.github.com/repos/OpenNeuroDatasets/'+datasetID+'/branches/master';
+            let rootSHA = ""
+            $.ajax({
+                url: query,
+                type: "GET",
+                async: false,
+                success: function(result) {
+                    rootSHA = result['commit']['sha'];
+                },
+                error:function(error) {
+                    console.log('Error ' + error)
+                }
+            })
+            let tree = getGitTree(datasetID, rootSHA)
+            const data = gitToFileTree(datasetID, tree)
+            return data
+        }
     </script>
 </head>
 <body>
@@ -71,8 +78,10 @@
         </div>
     </div>
     <script>
-        $('#tree').treeview({data: getTree(), showBorder: false});
+        $('#tree').treeview({data: getData('ds002718'), showBorder: false});
     </script>
 
+    <script>
+    </script>
 </body>
 </html>
