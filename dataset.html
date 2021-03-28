@@ -41,8 +41,34 @@
             return data
         }
         function getData(datasetID) {
+            $.ajax({
+                url: 'https://raw.githubusercontent.com/OpenNeuroDatasets/ds002718/master/README',
+                type: "GET",
+                // async: false,
+                success: function(result) {
+                    $('#README').html(result)
+                },
+                error:function(error) {
+                    console.log('Error ' + error)
+                }
+            });
+            $.ajax({
+                url: 'https://raw.githubusercontent.com/OpenNeuroDatasets/ds002718/master/dataset_description.json',
+                type: "GET",
+                // async: false,
+                success: function(result) {
+                    $('#datasetDescription').html(result)
+                    const json = JSON.parse(result)
+                    console.log(json)
+                    $('#datasetTitle').html(json['Name'])
+                },
+                error:function(error) {
+                    console.log('Error ' + error)
+                }
+            });
             const query = 'https://api.github.com/repos/OpenNeuroDatasets/'+datasetID+'/contents/';
             let gitTree = null
+
 //             gitTree = getGitTree(query)
 //             const myJSON = JSON.stringify(gitTree)
 //             // create a link DOM fragment
@@ -77,53 +103,55 @@
     <div class="container-fluid">
         <div class="row">
             <div class="col-lg-12">
-                <h1>Face processing EEG dataset for EEGLAB</h1>
+                <h1 id="datasetTitle"></h1>
             </div>
         </div>
         <div class="row">
             <div class="col-lg-6">
                 <div class="jumbotron">
                     <h2>README</h2>
-                    <pre>Multi-subject, multi-modal (sMRI+EEG) neuroimaging dataset
-on face processing. Original data described at https://www.nature.com/articles/sdata20151
-This is repackaged version of the EEG data in EEGLAB format. The data has gone through
-minimal preprocessing including (see wh_extracteeg_BIDS.m):
-- Ignoring fMRI and MEG data (sMRI preserved for EEG source localization)
-- Extracting EEG channels out of the MEG/EEG fif data
-- Adding fiducials
-- Renaming EOG and EKG channels
-- Extracting events from event channel
-- Removing spurious events 5, 6, 7, 13, 14, 15, 17, 18 and 19
-- Removing spurious event 24 for subject 3 run 4
-- Renaming events taking into account button assigned to each subject
-- Correcting event latencies (events have a shift of 34 ms)
-- Resampling data to 250 Hz (this is a step that is done because
-  this dataset is used as tutorial for EEGLAB and need to be lightweight)
-- Merging run 1 to 6
-- Removing event fields urevent and duration
-- Filling up empty fields for events boundary and stim_file.
-- Saving as EEGLAB .set format
+                    <pre id="README"></pre>
+<!--                        Multi-subject, multi-modal (sMRI+EEG) neuroimaging dataset-->
+<!--on face processing. Original data described at https://www.nature.com/articles/sdata20151-->
+<!--This is repackaged version of the EEG data in EEGLAB format. The data has gone through-->
+<!--minimal preprocessing including (see wh_extracteeg_BIDS.m):-->
+<!-- - Ignoring fMRI and MEG data (sMRI preserved for EEG source localization)-->
+<!-- - Extracting EEG channels out of the MEG/EEG fif data-->
+<!-- - Adding fiducials-->
+<!-- - Renaming EOG and EKG channels-->
+<!-- - Extracting events from event channel-->
+<!-- - Removing spurious events 5, 6, 7, 13, 14, 15, 17, 18 and 19-->
+<!-- - Removing spurious event 24 for subject 3 run 4-->
+<!-- - Renaming events taking into account button assigned to each subject-->
+<!-- - Correcting event latencies (events have a shift of 34 ms)-->
+<!-- - Resampling data to 250 Hz (this is a step that is done because-->
+<!--  this dataset is used as tutorial for EEGLAB and need to be lightweight)-->
+<!-- - Merging run 1 to 6-->
+<!-- - Removing event fields urevent and duration-->
+<!-- - Filling up empty fields for events boundary and stim_file.-->
+<!-- - Saving as EEGLAB .set format-->
 
-Ramon Martinez, Dung Truong, Scott Makeig, Arnaud Delorme (UCSD, La Jolla, CA, USA)</pre>
+<!--Ramon Martinez, Dung Truong, Scott Makeig, Arnaud Delorme (UCSD, La Jolla, CA, USA)</pre>-->
                 </div>
                 <div class="jumbotron">
                     <h2>Dataset description</h2>
-                    <pre>{
-    "Name": "Face processing EEG dataset for EEGLAB",
-    "BIDSVersion": "v1.2.0",
-    "License": "CC0",
-    "Authors": [
-        "Daniel G. Wakeman",
-        "Richard N Henson"
-    ],
-    "ReferencesAndLinks": [
-        "Wakeman, D., Henson, R. A multi-subject, multi-modal human neuroimaging dataset. Sci Data 2, 150001 (2015). https://doi.org/10.1038/sdata.2015.1"
-    ],
-    "Funding": [
-        "This work was supported by the UK Medical Research Council (MC_A060_5PR10) and Elekta Ltd."
-    ],
-    "DatasetDOI": "10.18112/openneuro.ds002718.v1.0.4"
-}</pre>
+                    <pre id="datasetDescription"></pre>
+<!--                    {-->
+<!--    "Name": "Face processing EEG dataset for EEGLAB",-->
+<!--    "BIDSVersion": "v1.2.0",-->
+<!--    "License": "CC0",-->
+<!--    "Authors": [-->
+<!--        "Daniel G. Wakeman",-->
+<!--        "Richard N Henson"-->
+<!--    ],-->
+<!--    "ReferencesAndLinks": [-->
+<!--        "Wakeman, D., Henson, R. A multi-subject, multi-modal human neuroimaging dataset. Sci Data 2, 150001 (2015). https://doi.org/10.1038/sdata.2015.1"-->
+<!--    ],-->
+<!--    "Funding": [-->
+<!--        "This work was supported by the UK Medical Research Council (MC_A060_5PR10) and Elekta Ltd."-->
+<!--    ],-->
+<!--    "DatasetDOI": "10.18112/openneuro.ds002718.v1.0.4"-->
+<!--}</pre>-->
                 </div>
             </div>
             <div class="col-lg-6">
