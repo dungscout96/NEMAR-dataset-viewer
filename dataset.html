@@ -12,50 +12,64 @@
     <script src="./js/bootstrap-treeview.min.js"></script>
     <title>Title</title>
     <script>
-        function gitToFileTree(datasetID, gitTree) {
-            let fileTree = [];
-            gitTree.forEach(function(item) {
-                if (item['type'] === 'tree')
-                    fileTree.push({text: item['path'], state: {expanded: false}, nodes: gitToFileTree(datasetID, getGitTree(datasetID,item['sha']))})
-                else if (item['type'] === "blob")
-                    fileTree.push({text: item['path']})
-                })
-            return fileTree
-        }
-        function getGitTree(datasetID, sha) {
-            let data = null
-            let treeContentURL = 'https://api.github.com/repos/OpenNeuroDatasets/' +
-                datasetID + '/git/trees/' + sha;
+        function getGitTree(contentURL) {
+            let data = null;
             $.ajax({
-                url: treeContentURL,
+                url: contentURL,
+                headers: {Authorization:'token ' + '3646292e23cc66903872860a07218cd0f0cb130c'},
                 type: "GET",
                 async: false,
                 success: function(result) {
-                    data = result['tree']
+                    let fileTree = [];
+                    result.forEach(function(item) {
+                        if (item['type'] === 'dir')
+                            fileTree.push({text: item['name'], state: {expanded: false}, nodes: getGitTree(item['url'])});
+                        else {
+                            if (item['download_url'] !== null && item['type'] === 'file')
+                                fileTree.push({text: item['name'], href: item['download_url']})
+                            else
+                                fileTree.push({text: item['name']})
+
+                        }
+                    });
+                    data = fileTree;
                 },
                 error:function(error) {
                     console.log('Error ' + error)
                 }
-            })
+            });
             return data
         }
         function getData(datasetID) {
-            const query = 'https://api.github.com/repos/OpenNeuroDatasets/'+datasetID+'/branches/master';
-            let rootSHA = ""
+            const query = 'https://api.github.com/repos/OpenNeuroDatasets/'+datasetID+'/contents/';
+            let gitTree = null
+//             gitTree = getGitTree(query)
+//             const myJSON = JSON.stringify(gitTree)
+//             // create a link DOM fragment
+//             var $link = $("<a />");
+// // encode any special characters in the JSON
+//             var text = encodeURIComponent( myJSON );
+//
+// // <a download="filename.txt" href='data:application/octet-stream,...'></a>
+//             $link
+//                 .attr( "download", "filename.txt" )
+//                 .attr( "href", "data:application/octet-stream," + text )
+//                 .appendTo( "body" )
+//                 .get(0)
+//                 .click()
+            const ds002718TreeLink = 'https://raw.githubusercontent.com/dungscout96/NEMAR-dataset-viewer/master/ds002718TreeWithLinks.txt';
             $.ajax({
-                url: query,
+                url: ds002718TreeLink,
                 type: "GET",
                 async: false,
                 success: function(result) {
-                    rootSHA = result['commit']['sha'];
+                    gitTree = result;
                 },
                 error:function(error) {
                     console.log('Error ' + error)
                 }
-            })
-            let tree = getGitTree(datasetID, rootSHA)
-            const data = gitToFileTree(datasetID, tree)
-            return data
+            });
+            $('#tree').treeview({data: gitTree, showBorder: true, enableLinks: true});
         }
     </script>
 </head>
@@ -78,7 +92,8 @@
         </div>
     </div>
     <script>
-        $('#tree').treeview({data: getData('ds002718'), showBorder: false});
+        getData('ds002718');
+        // $('#tree').treeview({data: getData('ds002718'), showBorder: false});
     </script>
 
     <script>
