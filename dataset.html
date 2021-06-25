@@ -12,37 +12,11 @@
     <script src="./js/bootstrap-treeview.min.js"></script>
     <title>Title</title>
     <script>
-        function getGitTree(contentURL) {
-            let data = null;
+        function getData() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const datasetID = urlParams.get('id');
             $.ajax({
-                url: contentURL,
-                headers: {Authorization:'token ' + '3646292e23cc66903872860a07218cd0f0cb130c'},
-                type: "GET",
-                async: false,
-                success: function(result) {
-                    let fileTree = [];
-                    result.forEach(function(item) {
-                        if (item['type'] === 'dir')
-                            fileTree.push({text: item['name'], state: {expanded: false}, nodes: getGitTree(item['url'])});
-                        else {
-                            if (item['download_url'] !== null && item['type'] === 'file')
-                                fileTree.push({text: item['name'], href: item['download_url']})
-                            else
-                                fileTree.push({text: item['name']})
-
-                        }
-                    });
-                    data = fileTree;
-                },
-                error:function(error) {
-                    console.log('Error ' + error)
-                }
-            });
-            return data
-        }
-        function getData(datasetID) {
-            $.ajax({
-                url: 'https://raw.githubusercontent.com/OpenNeuroDatasets/ds002718/master/README',
+                url: `https://raw.githubusercontent.com/OpenNeuroDatasets/${datasetID}/master/README`,
                 type: "GET",
                 // async: false,
                 success: function(result) {
@@ -53,7 +27,7 @@
                 }
             });
             $.ajax({
-                url: 'https://raw.githubusercontent.com/OpenNeuroDatasets/ds002718/master/dataset_description.json',
+                url: `https://raw.githubusercontent.com/OpenNeuroDatasets/${datasetID}/master/dataset_description.json`,
                 type: "GET",
                 // async: false,
                 success: function(result) {
@@ -66,27 +40,9 @@
                 }
             });
             let gitTree = null
-
-//            // code to get file tree from scratch
-//             const query = 'https://api.github.com/repos/OpenNeuroDatasets/'+datasetID+'/contents/';
-//             gitTree = getGitTree(query)
-//             const myJSON = JSON.stringify(gitTree)
-//             // create a link DOM fragment
-//             var $link = $("<a />");
-// // encode any special characters in the JSON
-//             var text = encodeURIComponent( myJSON );
-//
-// // <a download="filename.txt" href='data:application/octet-stream,...'></a>
-//             $link
-//                 .attr( "download", "filename.txt" )
-//                 .attr( "href", "data:application/octet-stream," + text )
-//                 .appendTo( "body" )
-//                 .get(0)
-//                 .click()
-            // reload saved tree
-            const ds002718TreeLink = 'https://raw.githubusercontent.com/dungscout96/NEMAR-dataset-viewer/master/ds002718TreeWithLinks.txt';
+            const treeLink = `https://raw.githubusercontent.com/dungscout96/NEMAR-dataset-viewer/master/data/${datasetID}TreeWithLinks.txt`;
             $.ajax({
-                url: ds002718TreeLink,
+                url: treeLink,
                 type: "GET",
                 // async: false,
                 success: function(result) {
@@ -97,7 +53,6 @@
                     console.log('Error ' + error)
                 }
             });
-            // $('#tree').treeview({data: gitTree, showBorder: true, enableLinks: true});
         }
     </script>
 </head>
@@ -126,7 +81,7 @@
         </div>
     </div>
     <script>
-        getData('ds002718');
+        getData();
     </script>
 
     <script>
