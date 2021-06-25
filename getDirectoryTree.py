@@ -2,7 +2,8 @@ import hashlib
 import json
 import subprocess
 
-dataset = '/Users/dtyoung/Documents/NEMAR/ds003705'
+dataset = 'ds003004'
+dataset_directory = f'/Users/dtyoung/Documents/NEMAR/{dataset}'
 
 def compute_file_hash(git_hash, path):
     """Computes a unique hash for a given git path, based on the git hash and path values."""
@@ -14,7 +15,7 @@ def parse_ls_tree_line(gitTreeLine):
     mode, obj_type, obj_hash, size = metadata.split()
     return [filename, mode, obj_type, obj_hash, size]
 
-def read_ls_tree_line(tree, gitTreeLine):
+def read_ls_tree_line(tree, dataset, dataset_directory, gitTreeLine, path=''):
     """Read one line of `git ls-tree` and append to the correct buckets of files, symlinks, and objects."""
     filename, mode, obj_type, obj_hash, size = parse_ls_tree_line(
         gitTreeLine)
@@ -40,20 +41,20 @@ def read_ls_tree_line(tree, gitTreeLine):
     #                   'id': file_id, 'key': obj_hash, 'urls': [], 'annexed': False})
 
     if obj_type == "blob":
-        tree.append({"text": filename})
+        tree.append({"text": filename, "href": f"https://raw.githubusercontent.com/OpenNeuroDatasets/{dataset}/master/{path}{filename}"})
     if obj_type == "tree":
-        tree.append({"text": filename, "state": {"expanded": False}, "nodes": get_repo_files(dataset, obj_hash)})
+        tree.append({"text": filename, "state": {"expanded": False}, "nodes": get_repo_files(dataset, dataset_directory, obj_hash, path=f"{path}{filename}/")})
 
 
 
-def get_repo_files(dataset, branch='HEAD'):
+def get_repo_files(dataset, dataset_directory, branch='HEAD', path=''):
     tree = []
     """Read all files in a repo at a given branch, tag, or commit hash."""
     gitProcess = subprocess.Popen(
-        ['git', 'ls-tree', '-l', branch], cwd=dataset, stdout=subprocess.PIPE, encoding='utf-8')
+        ['git', 'ls-tree', '-l', branch], cwd=dataset_directory, stdout=subprocess.PIPE, encoding='utf-8')
     for line in gitProcess.stdout:
         gitTreeLine = line.rstrip()
-        read_ls_tree_line(tree, gitTreeLine)
+        read_ls_tree_line(tree, dataset, dataset_directory, gitTreeLine, path)
     return tree
     # # After regular files, process all symlinks with one git cat-file --batch call
     # # This is about 100x faster than one call per file for annexed file heavy datasets
@@ -77,4 +78,4 @@ def get_repo_files(dataset, branch='HEAD'):
     # return get_repo_urls(dataset.path, files)
 
 
-print(json.dumps(get_repo_files(dataset)))
+print(json.dumps(get_repo_files(dataset, dataset_directory)))
