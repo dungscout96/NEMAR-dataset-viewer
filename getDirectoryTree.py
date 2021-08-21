@@ -1,5 +1,6 @@
 import json
 import subprocess
+import os
 
 def parse_ls_tree_line(gitTreeLine):
     """Read one line of `git ls-tree` output and produce filename + metadata fields"""
@@ -36,11 +37,18 @@ def get_repo_files(dataset, dataset_directory, branch='HEAD', path=''):
         read_ls_tree_line(tree, dataset, dataset_directory, gitTreeLine, path)
     return tree
 
-nemar_path = '/Users/dtyoung/Documents/NEMAR/openneuro_eeg'
-with open('datasets.txt','r') as f:
+nemar_path = '/Users/dtyoung/Documents/NEMAR/openneuro_datasets'
+with open('openneuro_datasets_cont','r') as f:
     for line in f.readlines():
         if not line.__contains__("processed"):
             datasetId = line.strip()
-            dataset_directory = f'{nemar_path}/{datasetId}'
-            with open(f'data/{datasetId}TreeWithLinks.txt', 'w') as out:
-                out.write(json.dumps(get_repo_files(datasetId, dataset_directory)))
+            if not os.path.isfile(f'data/{datasetId}TreeWithLinks.txt'):
+                print(f'processing {datasetId}...')
+                dataset_directory = f'{nemar_path}/{datasetId}'
+                try:
+                    gitProcess = subprocess.run(
+                        ['datalad', 'install', f'https://github.com/OpenNeuroDatasets/{datasetId}.git'], check=True, cwd=nemar_path, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+                    with open(f'data/{datasetId}TreeWithLinks.txt', 'w') as out:
+                        out.write(json.dumps(get_repo_files(datasetId, dataset_directory)))
+                except subprocess.CalledProcessError:
+                    print(f'Error processing {datasetId}. Move on')
